@@ -1,0 +1,393 @@
+\documentclass[handout,10pt]{beamer}
+
+\usetheme{AnnArbor}
+\usecolortheme{beaver}
+
+\graphicspath{{include/}}
+
+\setlength{\unitlength}{\textwidth}  % measure in textwidths
+\usepackage[normalem]{ulem}
+
+% to avoid counting all pages
+\newcommand{\backupbegin}{
+   \newcounter{finalframe}
+   \setcounter{finalframe}{\value{framenumber}}
+}
+\newcommand{\backupend}{
+   \setcounter{framenumber}{\value{finalframe}}
+}
+
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{enumerate items}[default]
+\setbeamertemplate{enumerate subitem}{\alph{enumii}.}
+\setbeamertemplate{enumerate subsubitem}{\roman{enumiii}.}
+\setkeys{Gin}{width=0.6\textwidth}
+
+\newcommand{\ind}{\stackrel{ind}{\sim}}
+\providecommand{\ov}[1]{\overline{#1}}
+
+
+\institute[ISU]{Iowa State University}
+\date{\today}
+
+\title[Fully Bayes RNAseq analysis]{Fully Bayesian analysis of RNAseq data for gene expression heterosis detection}
+\author{Dr. Jarad Niemi}
+
+\begin{document}
+
+
+
+\begin{frame}
+\maketitle
+
+\pause
+
+{\small
+Dr. Dan Nettleton (ISU) and  Dr. Will Landau (Eli Lilly)
+}
+
+\vspace{0.2in} \pause
+
+{\tiny
+This research was supported by National Institute of General Medical Sciences (NIGMS) of the National Institutes of Health and the joint National Science Foundation / NIGMS Mathematical Biology Program under award number R01GM109458. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health or the National Science Foundation.
+}
+
+\end{frame}
+
+
+
+
+
+
+\section{RNAseq data}
+
+
+
+\begin{frame}
+\frametitle{RNAseq data}
+\setkeys{Gin}{width=0.7\textwidth}
+
+\begin{center}
+\includegraphics{data}
+{\tiny (Will Landau)}
+\end{center}
+
+\pause
+{\small
+\begin{itemize}
+\item Low parent heterosis (LPH): expression in hybrid is lower than both parents
+\item High parent heterosis (HPH): expression in hybrid is higher than both parents
+\end{itemize}
+}
+\end{frame}
+
+
+
+
+\subsection{Hierarchical overdispersed count regression model}
+\begin{frame}
+\frametitle{Overdispersed count regression model}
+
+Let 
+\begin{itemize}
+\item $g$ ($g=1,\ldots,G$) identify the gene, 
+\item $n$ ($n=1,\ldots,N$) identify the sample, \pause
+\item $y$ be the $G\times N$ matrix of RNAseq counts \pause and
+\item $X$ be the $N\times L$ model matrix that connects the $N$ samples to the varieties, blocking factors, etc.
+\end{itemize}
+\pause
+We assume 
+\[ 
+y_{gn} \ind \text{Po} \left (e^{h_n + \varepsilon_{gn} + x_n' \beta_{g}} \right )
+\]
+\pause
+where 
+\begin{itemize}[<+->]
+\item $h_n$ are \emph{normalization factors},
+\item $\varepsilon_{gn} \ind N(0,\gamma_g)$ allow for gene-specific overdispersion, 
+\item $x_n$ is the $n^{th}$ row of $X$, and
+\item $\beta_g$ is a vector of length $L$ that account for effects on gene expression of variables of interest. 
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Hierarchical model}
+
+Recall 
+\[ 
+y_{gn} \ind \text{Po} \left (e^{h_n + \varepsilon_{gn} + x_n' \beta_{g}} \right )
+\qquad\mbox{and}\qquad
+\varepsilon_{gn} \ind N(0,\gamma_g).
+\]
+
+\vspace{0.1in} \pause
+
+We construct a hierarchical model for both $\gamma_g$ and $\beta_g$ to borrow information across genes. \pause
+Specifically, we assume
+\[ 
+1/\gamma_g\ind \text{Ga} \left (\nu/2,\nu\tau/2 \right)
+\]
+such that $E[1/\gamma_g] = 1/\tau$ and $CoV[1/\gamma_g] = \sqrt{2/\nu}$ \pause and 
+\[ 
+\beta_{g\ell} \ind N(\theta_\ell, \sigma_\ell^2)
+\]
+for $\ell=1,\ldots,L$. 
+\end{frame}
+
+
+
+
+
+
+\begin{frame}
+\frametitle{Heterosis hypotheses}
+
+{\footnotesize
+\begin{tabular}{l|l|l}
+Heterosis & With log-scale group means  & With $\beta_{g\ell}$ parameters \\ \hline
+high-parent BM & $\phantom{1\mu_{g,\text{BM}} + } \mu_{g,\text{BM}} > \phantom{2} \max \left (\mu_{g,\text{B}}, \mu_{g,\text{M}} \right )$ & $\phantom{-}2\beta_{g2} + \beta_{g4}, \phantom{-}2\beta_{g3} + \beta_{g4} > 0$ \\
+low-parent BM & $\phantom{1\mu_{g,\text{BM}} + }\mu_{g,\text{BM}} < \phantom{2}  \min\, \left (\mu_{g,\text{B}}, \mu_{g,\text{M}} \right )$ & $-2\beta_{g2} - \beta_{g4}, -2\beta_{g3} - \beta_{g4} > 0$ \\
+high-parent MB & $\phantom{1\mu_{g,\text{BM}} + }\mu_{g,\text{MB}} > \phantom{2}  \max \left (\mu_{g,\text{B}}, \mu_{g,\text{M}} \right )$ & $\phantom{-}2\beta_{g2} - \beta_{g4}, \phantom{-}2\beta_{g3} - \beta_{g4} > 0$ \\
+low-parent MB & $\phantom{1\mu_{g,\text{BM}} + }  \mu_{g,\text{MB}} < \phantom{2} \min\, \left (\mu_{g,\text{B}}, \mu_{g,\text{M}} \right )$ & $-2\beta_{g2} + \beta_{g4}, \phantom{-}2\beta_{g3} + \beta_{g4} > 0$ \\
+high-parent mean & $\mu_{g,\text{BM}} + \mu_{g,\text{MB}} > 2 \max \left (\mu_{g,\text{B}}, \mu_{g,\text{M}} \right )$ & $\phantom{-}\beta_{g2}, \phantom{-}\beta_{g3} > 0$ \\
+low-parent mean & $\mu_{g,\text{BM}} + \mu_{g,\text{MB}} < 2 \min\, \left (\mu_{g,\text{B}}, \mu_{g,\text{M}} \right )$ & $-\beta_{g2}, -\beta_{g3} > 0$ 
+\end{tabular}
+}
+
+\vspace{0.2in} \pause
+
+All hypothesis regions are intersections of linear combination events\pause, but we can also accomodate unions of contrast events via 
+\[ 
+P(A\cup B) = P(A) + P(B) - P(A \cap B).
+\]
+
+\end{frame}
+
+
+
+
+
+
+\subsection{Fully Bayes}
+\begin{frame}
+\frametitle{Priors}
+
+All priors are constructed to be vague, proper, and (if possible) conditionally conjugate. \pause 
+There are $2(L+1)$ hyperparameters and we assign the following priors
+\[ \begin{array}{rll}
+\tau &\sim Ga(a,b) & \mbox{conditionally conjugate} \\
+\nu &\sim Unif(0,d) \\
+\theta_\ell &\ind N(0,c_\ell^2) & \mbox{conditionally conjugate} \\
+\sigma_\ell &\ind Unif(0,s_\ell) & \mbox{{\tiny (Gelman (2006))}}
+\end{array} \]
+\pause
+As we'll see, posterior distributions for these parameters are extremely tight relative to their priors. 
+
+\end{frame}
+
+
+
+
+
+\begin{frame}
+\frametitle{Constructing a Gibbs sampler}
+
+Conditional independence within a step:
+\[ \begin{array}{rl}
+p(\varepsilon|\ldots) &\propto \prod_{g=1}^G \prod_{n=1}^N Po\left(y_{gn}|e^{h_n+\varepsilon_{gn}+x_n'\beta_g}\right)N(\varepsilon_{gn}|0,\gamma_g) \\
+p(\gamma|\ldots) &\propto \prod_{g=1}^G \prod_{n=1}^N N(\varepsilon_{gn}|0,\gamma_g) IG(\gamma_g|\nu/2,\nu\tau/2) \\
+p(\beta_{\ell}|\ldots) &\propto \prod_{g=1}^G \prod_{n=1}^N Po\left(y_{gn}|e^{h_n+\varepsilon_{gn}+x_n'\beta_g}\right)N(\beta_{g\ell}|\theta_\ell, \sigma_\ell^2) 
+\end{array} \]
+
+\vspace{0.1in} \pause
+
+Sufficient ``statistics'':
+\[ \begin{array}{rl@{\qquad}rl}
+p(\tau|\ldots) &\sim Ga(\tau|a',b') & (a',b') &= f_{\tau}(\gamma,\nu,a,b) \\
+p(\nu|\ldots) &\sim p(\nu|d')\mathrm{I}(0<\nu<d) & d' &= f_\nu(\gamma,\tau,d) \\
+p(\theta_\ell|\ldots) &\sim N(\theta_\ell|m'_\ell, C'_\ell) & (m'_\ell,C'_\ell) &= f_{\theta_\ell}(\beta_\ell,\sigma_\ell,c_\ell^2) \\
+p(\sigma_\ell^2|\ldots) &\sim IG(e',f') \mathrm{I}(0<\sigma_\ell^2<s^2_\ell) & (e',f') &= f_{\sigma_\ell}(\beta_\ell,\theta_{\ell})
+\end{array} \]
+\pause
+where the functions calculate means, variances, products, etc. over $G$ terms. 
+\end{frame}
+
+
+\subsection{GPUs}
+
+
+\begin{frame}
+\frametitle{Parallelization translated to a GPU}
+
+If there are $G$ nodes, \pause then 
+\begin{itemize}
+\item Conditional independence \pause $\to$ embarrassingly parallel \pause - possible speedup is $G$ \pause
+\item Calculate sufficient ``statistics'' \pause $\to$ reduction \pause - possible speedup is $[G-1]/\log_2(G)$
+\end{itemize}
+
+\vspace{0.1in} \pause
+
+\begin{center}
+\includegraphics[width=0.6\textwidth]{parallel_reduction}
+
+{\tiny (\url{https://scs.senecac.on.ca/~gpu610/pages/images/parallel_reduction.png})}
+\end{center}
+
+
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{frame}[fragile]
+\frametitle{Implementation}
+The computation for this hierarchical overdispersed count regression model is provided in the following three R packages at \url{https://github.com/wlandau/}:
+
+\begin{itemize}
+\item {\tt fbseq}: user interface 
+\item {\tt fbseqOpenMP}: multithreaded backend
+\item {\tt fbseqCUDA}: NVIDIA GPU backend
+\end{itemize}
+
+\pause
+
+<<setup,size="tiny", cache=TRUE>>=
+library(fbseq)
+data(paschold) # Paschold et. al. (2012) data
+
+paschold@contrasts[[5]]
+paschold@contrasts[[6]]
+paschold@propositions$`high-parent_B73xMo17`
+@
+
+<<dependson="setup",eval=FALSE, size="tiny">>=
+configs    = Configs(burnin = 10, iterations = 10, thin = 1) 
+chain      = Chain(paschold, configs) 
+chain_list = fbseq(chain, backend = "CUDA")
+@
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+
+\section{Real data analysis}
+\begin{frame}
+\setkeys{Gin}{width=0.4\textwidth}
+\frametitle{Analysis of Paschold et. al. (2012) data}
+
+\begin{center}
+\includegraphics{heterosis}
+\end{center}
+
+\begin{itemize}
+\item $N=16$ with 4 replicates/variety on 2 plates
+	\begin{itemize}
+	\item varieties: B73, Mo17, B73$\times$Mo17, Mo17$\times$ B73
+	\end{itemize}
+\item $G=39\,656$
+\item 21\% of genes have mean counts less than 1
+\item 39\% have mean counts less than 10
+\item count: median 37, mean $260$, and max $38\,010$
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Hyperparameter posterior}
+\setkeys{Gin}{width=0.8\textwidth}
+\begin{center}
+\includegraphics{fig-hyperhist}
+\end{center}
+\end{frame}
+
+
+\begin{frame}
+\setkeys{Gin}{width=0.6\textwidth}
+\frametitle{Gene-specific parameter posteriors}
+
+Compare posterior distribution (gray area) to normal-based approximation (black dashed line).
+
+\vspace{-0.15in}
+
+\begin{center}
+\includegraphics{fig-betahist}
+\end{center}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Smokestack plot}
+\setkeys{Gin}{width=0.7\textwidth}
+
+Effect size for HPH BM is the maximum of 0 and $\min(2\beta_{g2}+\beta_{g4}, 2\beta_{g3}+\beta_{g4})/\sqrt{\gamma_g}$. 
+
+\begin{center}
+\includegraphics{fig-volcano}
+\end{center}
+\end{frame}
+
+
+
+
+
+\begin{frame}
+\frametitle{Summary}
+
+\begin{itemize}
+\item Introduced a hierarchical overdispersed count regression model and
+\item a GPU-implementation of a fully Bayesian analysis.
+\end{itemize}
+
+\vspace{0.2in} \pause
+
+This slides are available 
+\begin{itemize}
+\item \url{https://github.com/jarad/JSM2018}
+\item \url{http://www.jarad.me/research/presentations.html}
+\end{itemize}
+
+\vspace{0.2in} \pause
+
+Manuscripts:
+\begin{itemize}
+\item JABES 
+\item JASA
+\item arXiv
+\end{itemize}
+
+\vspace{0.2in} \pause
+
+\begin{center}
+{\Huge
+Thank you!
+}
+\end{center}
+
+\end{frame}
+
+
+\end{document}
