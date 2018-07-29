@@ -1,4 +1,4 @@
-\documentclass[handout,10pt]{beamer}
+\documentclass[10pt]{beamer}
 
 \usetheme{AnnArbor}
 \usecolortheme{beaver}
@@ -41,13 +41,11 @@
 \begin{frame}
 \maketitle
 
-\pause
-
 {\small
 Dr. Dan Nettleton (ISU) and  Dr. Will Landau (Eli Lilly)
 }
 
-\vspace{0.2in} \pause
+\vspace{0.2in}
 
 {\tiny
 This research was supported by National Institute of General Medical Sciences (NIGMS) of the National Institutes of Health and the joint National Science Foundation / NIGMS Mathematical Biology Program under award number R01GM109458. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health or the National Science Foundation.
@@ -73,12 +71,8 @@ This research was supported by National Institute of General Medical Sciences (N
 {\tiny (Will Landau)}
 \end{center}
 
-\pause
 {\small
-\begin{itemize}
-\item Low parent heterosis (LPH): expression in hybrid is lower than both parents
-\item High parent heterosis (HPH): expression in hybrid is higher than both parents
-\end{itemize}
+Low (high) parent heterosis: expression in hybrid is lower (higher) than both parents
 }
 \end{frame}
 
@@ -92,8 +86,8 @@ This research was supported by National Institute of General Medical Sciences (N
 Let 
 \begin{itemize}
 \item $g$ ($g=1,\ldots,G$) identify the gene, 
-\item $n$ ($n=1,\ldots,N$) identify the sample, \pause
-\item $y$ be the $G\times N$ matrix of RNAseq counts \pause and
+\item $n$ ($n=1,\ldots,N$) identify the sample,
+\item $y$ be the $G\times N$ matrix of RNAseq counts and
 \item $X$ be the $N\times L$ model matrix that connects the $N$ samples to the varieties, blocking factors, etc.
 \end{itemize}
 \pause
@@ -103,8 +97,8 @@ y_{gn} \ind \text{Po} \left (e^{h_n + \varepsilon_{gn} + x_n' \beta_{g}} \right 
 \]
 \pause
 where 
-\begin{itemize}[<+->]
-\item $h_n$ are \emph{normalization factors},
+\begin{itemize}
+\item $h_n$ are \emph{normalization factors} (offsets),
 \item $\varepsilon_{gn} \ind N(0,\gamma_g)$ allow for gene-specific overdispersion, 
 \item $x_n$ is the $n^{th}$ row of $X$, and
 \item $\beta_g$ is a vector of length $L$ that account for effects on gene expression of variables of interest. 
@@ -122,14 +116,14 @@ y_{gn} \ind \text{Po} \left (e^{h_n + \varepsilon_{gn} + x_n' \beta_{g}} \right 
 \varepsilon_{gn} \ind N(0,\gamma_g).
 \]
 
-\vspace{0.1in} \pause
+\vspace{0.1in}
 
 We construct a hierarchical model for both $\gamma_g$ and $\beta_g$ to borrow information across genes. \pause
 Specifically, we assume
 \[ 
 1/\gamma_g\ind \text{Ga} \left (\nu/2,\nu\tau/2 \right)
 \]
-such that $E[1/\gamma_g] = 1/\tau$ and $CoV[1/\gamma_g] = \sqrt{2/\nu}$ \pause and 
+such that $E[1/\gamma_g] = 1/\tau$ and $CoV[1/\gamma_g] = \sqrt{2/\nu}$ and 
 \[ 
 \beta_{g\ell} \ind N(\theta_\ell, \sigma_\ell^2)
 \]
@@ -158,7 +152,7 @@ low-parent mean & $\mu_{g,\text{BM}} + \mu_{g,\text{MB}} < 2 \min\, \left (\mu_{
 
 \vspace{0.2in} \pause
 
-All hypothesis regions are intersections of linear combination events\pause, but we can also accomodate unions of contrast events via 
+All hypothesis regions are intersections of linear combination events\pause, but we can also accommodate unions of contrast events via 
 \[ 
 P(A\cup B) = P(A) + P(B) - P(A \cap B).
 \]
@@ -180,7 +174,7 @@ There are $2(L+1)$ hyperparameters and we assign the following priors
 \tau &\sim Ga(a,b) & \mbox{conditionally conjugate} \\
 \nu &\sim Unif(0,d) \\
 \theta_\ell &\ind N(0,c_\ell^2) & \mbox{conditionally conjugate} \\
-\sigma_\ell &\ind Unif(0,s_\ell) & \mbox{{\tiny (Gelman (2006))}}
+\sigma_\ell &\ind Unif(0,s_\ell) &
 \end{array} \]
 \pause
 As we'll see, posterior distributions for these parameters are extremely tight relative to their priors. 
@@ -210,7 +204,6 @@ p(\nu|\ldots) &\sim p(\nu|d')\mathrm{I}(0<\nu<d) & d' &= f_\nu(\gamma,\tau,d) \\
 p(\theta_\ell|\ldots) &\sim N(\theta_\ell|m'_\ell, C'_\ell) & (m'_\ell,C'_\ell) &= f_{\theta_\ell}(\beta_\ell,\sigma_\ell,c_\ell^2) \\
 p(\sigma_\ell^2|\ldots) &\sim IG(e',f') \mathrm{I}(0<\sigma_\ell^2<s^2_\ell) & (e',f') &= f_{\sigma_\ell}(\beta_\ell,\theta_{\ell})
 \end{array} \]
-\pause
 where the functions calculate means, variances, products, etc. over $G$ terms. 
 \end{frame}
 
@@ -221,13 +214,13 @@ where the functions calculate means, variances, products, etc. over $G$ terms.
 \begin{frame}
 \frametitle{Parallelization translated to a GPU}
 
-If there are $G$ nodes, \pause then 
+If there are $G$ nodes, then 
 \begin{itemize}
-\item Conditional independence \pause $\to$ embarrassingly parallel \pause - possible speedup is $G$ \pause
-\item Calculate sufficient ``statistics'' \pause $\to$ reduction \pause - possible speedup is $[G-1]/\log_2(G)$
+\item Conditional independence $\to$ embarrassingly parallel - possible speedup is $G$ \pause
+\item Calculate sufficient ``statistics'' $\to$ parallel reduction - possible speedup is $[G-1]/\log_2(G)$
 \end{itemize}
 
-\vspace{0.1in} \pause
+\vspace{0.1in}
 
 \begin{center}
 \includegraphics[width=0.6\textwidth]{parallel_reduction}
@@ -308,9 +301,9 @@ chain_list = fbseq(chain, backend = "CUDA")
 	\item varieties: B73, Mo17, B73$\times$Mo17, Mo17$\times$ B73
 	\end{itemize}
 \item $G=39\,656$
-\item 21\% of genes have mean counts less than 1
-\item 39\% have mean counts less than 10
-\item count: median 37, mean $260$, and max $38\,010$
+% \item 21\% of genes have mean counts less than 1
+% \item 39\% have mean counts less than 10
+% \item count: median 37, mean $260$, and max $38\,010$
 \end{itemize}
 
 \end{frame}
@@ -343,7 +336,7 @@ Compare posterior distribution (gray area) to normal-based approximation (black 
 \frametitle{Smokestack plot}
 \setkeys{Gin}{width=0.7\textwidth}
 
-Effect size for HPH BM is the maximum of 0 and $\min(2\beta_{g2}+\beta_{g4}, 2\beta_{g3}+\beta_{g4})/\sqrt{\gamma_g}$. 
+% Effect size for HPH BM is the maximum of 0 and $\min(2\beta_{g2}+\beta_{g4}, 2\beta_{g3}+\beta_{g4})/\sqrt{\gamma_g}$. 
 
 \begin{center}
 \includegraphics{fig-volcano}
@@ -375,8 +368,8 @@ This slides are available
 Manuscripts:
 \begin{itemize}
 \item JABES 
-\item JASA
 \item arXiv
+\item JASA
 \end{itemize}
 
 \vspace{0.2in} \pause
