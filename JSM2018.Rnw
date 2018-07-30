@@ -350,7 +350,7 @@ Manuscripts:
 \begin{itemize}
 \item Jarad Niemi, Eric Mittman, Will Landau, and Dan Nettleton. (2015) ``Empirical Bayes analysis of RNA-seq data for detection of gene expression heterosis.’’ Journal of Agricultural, Biological, and Environmental Statistcs, 20(4): 614-628
 \item Will Landau and Jarad Niemi. ``A fully Bayesian strategy for high-dimensional hierarchical modeling using massively parallel computing.'' \url{https://arxiv.org/abs/1606.06659}
-\item Will Landau, Jarad Niemi, and Dan Nettleton. ``Fully Bayesian analysis of RNA-seq counts for the detection of gene expression heterosis.'' \emph{in press Journal of the American Statistical Association}.
+\item Will Landau, Jarad Niemi, and Dan Nettleton. ``Fully Bayesian analysis of RNA-seq counts for the detection of gene expression heterosis.'' \emph{Journal of the American Statistical Association} (in press)
 \end{itemize}
 }
 
