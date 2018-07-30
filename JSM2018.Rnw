@@ -93,7 +93,7 @@ Let
 \pause
 We assume 
 \[ 
-y_{gn} \ind \text{Po} \left (e^{h_n + x_n' \beta_{g}} + \varepsilon_{gn} \right )
+y_{gn} \ind \text{Po} \left (e^{h_n + x_n' \beta_{g} + \varepsilon_{gn}} \right )
 \]
 \pause
 where 
@@ -121,13 +121,13 @@ y_{gn} \ind \text{Po} \left (e^{h_n + \varepsilon_{gn} + x_n' \beta_{g}} \right 
 We construct a hierarchical model for both $\beta_g$ and $\gamma_g$ to borrow information across genes. \pause
 Specifically, we assume
 \[ 
-1/\gamma_g\ind \text{Ga} \left (\nu/2,\nu\tau/2 \right)
-\]
-such that $E[1/\gamma_g] = 1/\tau$ and $CoV[1/\gamma_g] = \sqrt{2/\nu}$ \pause and 
-\[ 
 \beta_{g\ell} \ind N(\theta_\ell, \sigma_\ell^2)
 \]
-for $\ell=1,\ldots,L$. 
+for $\ell=1,\ldots,L$ \pause and
+\[ 
+1/\gamma_g\ind \text{Ga} \left (\nu/2,\nu\tau/2 \right)
+\]
+such that $E[1/\gamma_g] = 1/\tau$ and $CoV[1/\gamma_g] = \sqrt{2/\nu}$. 
 \end{frame}
 
 
@@ -204,7 +204,8 @@ p(\nu|\ldots) &\sim p(\nu|d')\mathrm{I}(0<\nu<d) & d' &= f_\nu(\gamma,\tau,d) \\
 p(\theta_\ell|\ldots) &\sim N(\theta_\ell|m'_\ell, C'_\ell) & (m'_\ell,C'_\ell) &= f_{\theta_\ell}(\beta_\ell,\sigma_\ell,c_\ell^2) \\
 p(\sigma_\ell^2|\ldots) &\sim IG(e',f') \mathrm{I}(0<\sigma_\ell^2<s^2_\ell) & (e',f') &= f_{\sigma_\ell}(\beta_\ell,\theta_{\ell})
 \end{array} \]
-where the functions calculate means, variances, products, etc. over $G$ terms. 
+where all functions can be written as sums over $G$ terms in order to calculate
+means, variances, etc.
 \end{frame}
 
 
