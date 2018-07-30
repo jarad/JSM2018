@@ -1,4 +1,4 @@
-\documentclass[10pt]{beamer}
+\documentclass[handout,10pt]{beamer}
 
 \usetheme{AnnArbor}
 \usecolortheme{beaver}
@@ -93,15 +93,15 @@ Let
 \pause
 We assume 
 \[ 
-y_{gn} \ind \text{Po} \left (e^{h_n + \varepsilon_{gn} + x_n' \beta_{g}} \right )
+y_{gn} \ind \text{Po} \left (e^{h_n + x_n' \beta_{g}} + \varepsilon_{gn} \right )
 \]
 \pause
 where 
 \begin{itemize}
 \item $h_n$ are \emph{normalization factors} (offsets),
-\item $\varepsilon_{gn} \ind N(0,\gamma_g)$ allow for gene-specific overdispersion, 
-\item $x_n$ is the $n^{th}$ row of $X$, and
-\item $\beta_g$ is a vector of length $L$ that account for effects on gene expression of variables of interest. 
+\item $x_n$ is the $n^{th}$ row of $X$,
+\item $\beta_g$ is a vector of length $L$ that account for effects on gene expression of variables of interest, and 
+\item $\varepsilon_{gn} \ind N(0,\gamma_g)$ allow for gene-specific overdispersion.
 \end{itemize}
 \end{frame}
 
@@ -118,12 +118,12 @@ y_{gn} \ind \text{Po} \left (e^{h_n + \varepsilon_{gn} + x_n' \beta_{g}} \right 
 
 \vspace{0.1in}
 
-We construct a hierarchical model for both $\gamma_g$ and $\beta_g$ to borrow information across genes. \pause
+We construct a hierarchical model for both $\beta_g$ and $\gamma_g$ to borrow information across genes. \pause
 Specifically, we assume
 \[ 
 1/\gamma_g\ind \text{Ga} \left (\nu/2,\nu\tau/2 \right)
 \]
-such that $E[1/\gamma_g] = 1/\tau$ and $CoV[1/\gamma_g] = \sqrt{2/\nu}$ and 
+such that $E[1/\gamma_g] = 1/\tau$ and $CoV[1/\gamma_g] = \sqrt{2/\nu}$ \pause and 
 \[ 
 \beta_{g\ell} \ind N(\theta_\ell, \sigma_\ell^2)
 \]
@@ -190,9 +190,9 @@ As we'll see, posterior distributions for these parameters are extremely tight r
 
 Conditional independence within a step:
 \[ \begin{array}{rl}
-p(\varepsilon|\ldots) &\propto \prod_{g=1}^G \prod_{n=1}^N Po\left(y_{gn}|e^{h_n+\varepsilon_{gn}+x_n'\beta_g}\right)N(\varepsilon_{gn}|0,\gamma_g) \\
+p(\varepsilon|\ldots) &\propto \prod_{g=1}^G \prod_{n=1}^N Po\left(y_{gn}\left|e^{h_n+\varepsilon_{gn}+x_n'\beta_g}\right.\right)N(\varepsilon_{gn}|0,\gamma_g) \\
 p(\gamma|\ldots) &\propto \prod_{g=1}^G \prod_{n=1}^N N(\varepsilon_{gn}|0,\gamma_g) IG(\gamma_g|\nu/2,\nu\tau/2) \\
-p(\beta_{\ell}|\ldots) &\propto \prod_{g=1}^G \prod_{n=1}^N Po\left(y_{gn}|e^{h_n+\varepsilon_{gn}+x_n'\beta_g}\right)N(\beta_{g\ell}|\theta_\ell, \sigma_\ell^2) 
+p(\beta_{\ell}|\ldots) &\propto \prod_{g=1}^G \prod_{n=1}^N Po\left(y_{gn}\left|e^{h_n+\varepsilon_{gn}+x_n'\beta_g}\right.\right)N(\beta_{g\ell}|\theta_\ell, \sigma_\ell^2) 
 \end{array} \]
 
 \vspace{0.1in} \pause
@@ -227,22 +227,7 @@ If there are $G$ nodes, then
 
 {\tiny (\url{https://scs.senecac.on.ca/~gpu610/pages/images/parallel_reduction.png})}
 \end{center}
-
-
 \end{frame}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -281,14 +266,9 @@ chain_list = fbseq(chain, backend = "CUDA")
 
 
 
-
-
-
-
-
 \section{Real data analysis}
 \begin{frame}
-\setkeys{Gin}{width=0.4\textwidth}
+\setkeys{Gin}{width=0.7\textwidth}
 \frametitle{Analysis of Paschold et. al. (2012) data}
 
 \begin{center}
@@ -334,7 +314,7 @@ Compare posterior distribution (gray area) to normal-based approximation (black 
 
 \begin{frame}
 \frametitle{Smokestack plot}
-\setkeys{Gin}{width=0.7\textwidth}
+\setkeys{Gin}{width=0.8\textwidth}
 
 % Effect size for HPH BM is the maximum of 0 and $\min(2\beta_{g2}+\beta_{g4}, 2\beta_{g3}+\beta_{g4})/\sqrt{\gamma_g}$. 
 
@@ -355,7 +335,7 @@ Compare posterior distribution (gray area) to normal-based approximation (black 
 \item a GPU-implementation of a fully Bayesian analysis.
 \end{itemize}
 
-\vspace{0.2in} \pause
+\vspace{0.1in} \pause
 
 This slides are available 
 \begin{itemize}
@@ -363,16 +343,18 @@ This slides are available
 \item \url{http://www.jarad.me/research/presentations.html}
 \end{itemize}
 
-\vspace{0.2in} \pause
+\vspace{0.1in} \pause
 
 Manuscripts:
+{\footnotesize
 \begin{itemize}
-\item JABES 
-\item arXiv
-\item JASA
+\item Jarad Niemi, Eric Mittman, Will Landau, and Dan Nettleton. (2015) ``Empirical Bayes analysis of RNA-seq data for detection of gene expression heterosis.’’ Journal of Agricultural, Biological, and Environmental Statistcs, 20(4): 614-628
+\item Will Landau and Jarad Niemi. ``A fully Bayesian strategy for high-dimensional hierarchical modeling using massively parallel computing.'' \url{https://arxiv.org/abs/1606.06659}
+\item Will Landau, Jarad Niemi, and Dan Nettleton. ``Fully Bayesian analysis of RNA-seq counts for the detection of gene expression heterosis.'' \emph{in press Journal of the American Statistical Association}.
 \end{itemize}
+}
 
-\vspace{0.2in} \pause
+\vspace{0.1in} \pause
 
 \begin{center}
 {\Huge
